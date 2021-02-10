@@ -1,19 +1,46 @@
 package com.ebookfrenzy.firebasedatabase
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
+
+    private var pets = ArrayList<Pet>()
+
+    val changeListener: ValueEventListener = object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            if (snapshot.hasChildren()){
+                // database is populated
+                var count = snapshot.childrenCount
+                pets.clear()
+                for (child in snapshot.children){
+                    val holdData = child.getValue(Pet::class.java)
+                    pets.add(holdData!!)
+
+
+//                    child.key?.let { Log.i("child", it) }
+//                    Log.i("value", child.getValue().toString())
+                }
+            }
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+            TODO("Not yet implemented")
+        }
+    }
 
 
     var petName = ""
@@ -40,7 +67,17 @@ class MainActivity : AppCompatActivity() {
 
             writeToDB(petName,petSpecies)
         }
+
+        database = Firebase.database.getReference("/pets")
+        database.addValueEventListener(changeListener)
+
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        database.removeEventListener(changeListener)
+    }
+
 
     private fun writeToDB(name:String,species:String) {
         database = Firebase.database.reference
@@ -48,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         database.child("pets").child(usersPet.pName).setValue(usersPet)
 
     }
-
     private fun createList(size: Int): List<ListItem> {
         val list = ArrayList<ListItem>()
 
