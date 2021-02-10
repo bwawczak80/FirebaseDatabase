@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">FirebaseDatabase</string>
+    <string name="add">Add</string>
+    <string name="name">Name</string>
+    <string name="species">Species</string>
+    <string name="pet_name">Pet Name</string>
+</resources>
